@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ingreanalyser</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #F5F2ED; --surface: #FDFBF8; --border: #E2DDD6;
+      --text: #1C1917; --muted: #78716C; --accent: #2D6A4F;
+      --accent-light: #EAF4EE; --warn: #B45309; --warn-light: #FEF3C7;
+      --danger: #9B1C1C; --danger-light: #FEE2E2;
+      --radius: 12px; --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    header { padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 10; }
+    .logo { font-family: 'DM Serif Display', serif; font-size: 1.45rem; letter-spacing: -0.02em; }
+    .logo span { color: var(--accent); }
+    #user-info { display: none; align-items: center; gap: 12px; font-size: 0.84rem; color: var(--muted); }
+    #logout-btn { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 6px 14px; font-size: 0.8rem; font-family: 'DM Sans', sans-serif; cursor: pointer; color: var(--muted); transition: all 0.2s; }
+    #logout-btn:hover { background: var(--danger-light); color: var(--danger); border-color: #FCA5A5; }
+    main { flex: 1; display: flex; align-items: flex-start; justify-content: center; padding: 44px 20px 60px; }
+    #login-page { width: 100%; max-width: 400px; }
+    .login-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 48px 40px; box-shadow: var(--shadow); }
+    .login-card h1 { font-family: 'DM Serif Display', serif; font-size: 2rem; font-weight: 400; margin-bottom: 6px; letter-spacing: -0.02em; }
+    .login-card > p { color: var(--muted); font-size: 0.875rem; margin-bottom: 32px; }
+    .field { margin-bottom: 18px; }
+    .field label { display: block; font-size: 0.78rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 7px; }
+    .field input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--text); outline: none; transition: border-color 0.2s; }
+    .field input:focus { border-color: var(--accent); }
+    .login-btn, .primary-btn { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; cursor: pointer; margin-top: 8px; transition: background 0.2s, transform 0.1s; }
+    .login-btn:hover, .primary-btn:hover { background: #245C43; }
+    .login-btn:disabled, .primary-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .login-error { margin-top: 14px; padding: 10px 14px; background: var(--danger-light); color: var(--danger); border-radius: 8px; font-size: 0.875rem; display: none; }
+    .demo-hint { margin-top: 20px; text-align: center; font-size: 0.78rem; color: var(--muted); }
+    .demo-hint code { background: var(--border); padding: 1px 5px; border-radius: 4px; font-size: 0.78rem; }
+    #analyser-page { display: none; width: 100%; max-width: 780px; flex-direction: column; gap: 24px; }
+    .input-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 36px 40px; box-shadow: var(--shadow); }
+    .input-card h2 { font-family: 'DM Serif Display', serif; font-size: 1.55rem; font-weight: 400; margin-bottom: 5px; letter-spacing: -0.02em; }
+    .input-card .subtitle { color: var(--muted); font-size: 0.875rem; margin-bottom: 20px; }
+    .input-card textarea { width: 100%; min-height: 120px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--text); resize: vertical; outline: none; transition: border-color 0.2s; line-height: 1.6; }
+    .input-card textarea:focus { border-color: var(--accent); }
+    .input-card textarea::placeholder { color: var(--muted); }
+    .example-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; margin-bottom: 18px; align-items: center; }
+    .example-chip { padding: 5px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 20px; font-size: 0.76rem; color: var(--muted); cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
+    .example-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+    .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; box-shadow: var(--shadow); }
+    .stat-num { font-family: 'DM Serif Display', serif; font-size: 1.8rem; font-weight: 400; line-height: 1; margin-bottom: 4px; }
+    .stat-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+    .safe-box .stat-num { color: var(--accent); }
+    .mild-box .stat-num { color: var(--warn); }
+    .harm-box .stat-num { color: var(--danger); }
+    #results-wrap { display: none; flex-direction: column; gap: 16px; }
+    .overall-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 28px; box-shadow: var(--shadow); display: flex; align-items: flex-start; gap: 18px; flex-wrap: wrap; }
+    .overall-badge-lg { padding: 8px 18px; border-radius: 8px; font-size: 0.82rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; flex-shrink: 0; }
+    .overall-badge-lg.safe { background: var(--accent-light); color: var(--accent); }
+    .overall-badge-lg.mildly_safe { background: var(--warn-light); color: var(--warn); }
+    .overall-badge-lg.harmful { background: var(--danger-light); color: var(--danger); }
+    .overall-summary { font-size: 0.88rem; color: var(--muted); line-height: 1.65; }
+    .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.76rem; color: var(--muted); margin-bottom: 10px; }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .legend-dot.safe { background: var(--accent); }
+    .legend-dot.mildly_safe { background: var(--warn); }
+    .legend-dot.harmful { background: var(--danger); }
+    .legend-dot.unknown { background: #A8A29E; }
+    .ingredients-grid { display: flex; flex-direction: column; gap: 9px; }
+    .ingredient-card { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--border); border-radius: var(--radius); padding: 14px 20px; box-shadow: var(--shadow); animation: fadeUp 0.25s ease both; transition: transform 0.15s; }
+    .ingredient-card:hover { transform: translateX(4px); }
+    .ingredient-card.safe { border-left-color: var(--accent); }
+    .ingredient-card.mildly_safe { border-left-color: var(--warn); }
+    .ingredient-card.harmful { border-left-color: var(--danger); }
+    .ingredient-card.unknown { border-left-color: #A8A29E; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .ingredient-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; gap: 10px; }
+    .ingredient-name { font-weight: 500; font-size: 0.95rem; }
+    .severity-pill { font-size: 0.7rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 10px; border-radius: 12px; white-space: nowrap; flex-shrink: 0; }
+    .severity-pill.safe { background: var(--accent-light); color: var(--accent); }
+    .severity-pill.mildly_safe { background: var(--warn-light); color: var(--warn); }
+    .severity-pill.harmful { background: var(--danger-light); color: var(--danger); }
+    .severity-pill.unknown { background: #F5F5F4; color: #78716C; }
+    .ingredient-desc { font-size: 0.83rem; color: var(--muted); line-height: 1.55; margin-bottom: 4px; }
+    .ingredient-reason { font-size: 0.8rem; color: var(--muted); font-style: italic; line-height: 1.4; }
+    .analyse-again-btn { display: block; width: 100%; padding: 13px; background: transparent; color: var(--accent); border: 1.5px solid var(--accent); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .analyse-again-btn:hover { background: var(--accent-light); }
+    .error-box { background: var(--danger-light); color: var(--danger); border: 1px solid #FCA5A5; border-radius: var(--radius); padding: 14px 18px; font-size: 0.875rem; display: none; }
+    #loading-wrap { display: none; text-align: center; padding: 28px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+    .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.75s linear infinite; margin: 0 auto 14px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loading-wrap p { color: var(--muted); font-size: 0.875rem; }
+    @media (max-width: 600px) { .input-card, .login-card { padding: 26px 20px; } .stats-bar { grid-template-columns: repeat(2, 1fr); } header { padding: 14px 20px; } }
+  </style>
+</head>
+<body>
+<header>
+  <div class="logo">Ingre<span>analyser</span></div>
+  <div id="user-info">
+    <span id="user-greeting"></span>
+    <button id="logout-btn" onclick="logout()">Sign out</button>
+  </div>
+</header>
+<main>
+  <div id="login-page">
+    <div class="login-card">
+      <h1>Welcome back</h1>
+      <p>Sign in to start analysing product ingredients</p>
+      <div class="field"><label>Username</label><input type="text" id="username" placeholder="Enter username" autocomplete="username"/></div>
+      <div class="field"><label>Password</label><input type="password" id="password" placeholder="Enter password" autocomplete="current-password" onkeydown="if(event.key==='Enter') login()"/></div>
+      <button class="login-btn" id="login-btn" onclick="login()">Sign in</button>
+      <div class="login-error" id="login-error"></div>
+      <p class="demo-hint">Demo — username: <code>admin</code> &nbsp; password: <code>password123</code></p>
+    </div>
+  </div>
+  <div id="analyser-page">
+    <div class="input-card" id="input-section">
+      <h2>Analyse Ingredients</h2>
+      <p class="subtitle">Paste or type the ingredients list from any product label</p>
+      <textarea id="ingredients-input" placeholder="e.g. Water, Sugar, Wheat Flour, Palm Oil, Sodium Benzoate, Aspartame, Citric Acid, Natural Flavors..."></textarea>
+      <div class="example-row">
+        <span style="font-size:0.75rem;color:var(--muted);">Try example:</span>
+        <button class="example-chip" onclick="loadExample('soda')">Soda drink</button>
+        <button class="example-chip" onclick="loadExample('chips')">Potato chips</button>
+        <button class="example-chip" onclick="loadExample('bread')">Bread</button>
+        <button class="example-chip" onclick="loadExample('candy')">Candy bar</button>
+        <button class="example-chip" onclick="loadExample('yogurt')">Yogurt</button>
+      </div>
+      <button class="primary-btn" onclick="analyse()">Analyse Ingredients →</button>
+    </div>
+    <div class="error-box" id="error-box"></div>
+    <div id="loading-wrap"><div class="spinner"></div><p>Looking up ingredients in our database…</p></div>
+    <div id="results-wrap">
+      <div class="stats-bar">
+        <div class="stat-box total-box"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total</div></div>
+        <div class="stat-box safe-box"><div class="stat-num" id="stat-safe">0</div><div class="stat-label">Safe</div></div>
+        <div class="stat-box mild-box"><div class="stat-num" id="stat-mild">0</div><div class="stat-label">Mildly Safe</div></div>
+        <div class="stat-box harm-box"><div class="stat-num" id="stat-harm">0</div><div class="stat-label">Harmful</div></div>
+      </div>
+      <div class="overall-card">
+        <span class="overall-badge-lg" id="overall-badge"></span>
+        <p class="overall-summary" id="summary-text"></p>
+      </div>
+      <div>
+        <div class="legend">
+          <span class="legend-item"><span class="legend-dot safe"></span>Safe</span>
+          <span class="legend-item"><span class="legend-dot mildly_safe"></span>Mildly Safe</span>
+          <span class="legend-item"><span class="legend-dot harmful"></span>Harmful</span>
+          <span class="legend-item"><span class="legend-dot unknown"></span>Not in DB</span>
+        </div>
+        <div class="ingredients-grid" id="ingredients-grid"></div>
+      </div>
+      <button class="analyse-again-btn" onclick="reset()">+ Analyse Another Product</button>
+    </div>
+  </div>
+</main>
+<script>
+  const API_BASE = "http://localhost:8000";
+  let token = localStorage.getItem("ia_token");
+  const EXAMPLES = {
+    soda: "Water, High Fructose Corn Syrup, Caramel Color, Phosphoric Acid, Natural Flavors, Caffeine, Sodium Benzoate, Citric Acid",
+    chips: "Potatoes, Vegetable Oil, Salt, Monosodium Glutamate, Artificial Flavors, Yellow 5, Yellow 6, Red 40",
+    bread: "Whole Wheat Flour, Water, Yeast, Salt, Sugar, Soy Lecithin, Calcium Propionate, Ascorbic Acid, Niacin, Thiamine, Riboflavin, Folic Acid",
+    candy: "Sugar, Corn Syrup, Palm Oil, Gelatin, Citric Acid, Tartrazine, Red 40, Blue 1, Artificial Flavors, BHA, TBHQ",
+    yogurt: "Milk, Skim Milk, Sugar, Pectin, Xanthan Gum, Citric Acid, Natural Flavors, Vitamin D, Lactic Acid, Riboflavin"
+  };
+  function init() { token ? showAnalyser() : showLogin(); }
+  function showLogin() { document.getElementById("login-page").style.display = "block"; document.getElementById("analyser-page").style.display = "none"; document.getElementById("user-info").style.display = "none"; }
+  function showAnalyser() { const u = localStorage.getItem("ia_user"); document.getElementById("login-page").style.display = "none"; document.getElementById("analyser-page").style.display = "flex"; document.getElementById("user-info").style.display = "flex"; document.getElementById("user-greeting").textContent = u || "User"; }
+  async function login() {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const btn = document.getElementById("login-btn");
+    if (!username || !password) { showLoginError("Please enter username and password."); return; }
+    btn.disabled = true; btn.textContent = "Signing in…";
+    document.getElementById("login-error").style.display = "none";
+    try {
+      const res = await fetch(`${API_BASE}/login`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({username, password}) });
+      const data = await res.json();
+      if (!res.ok) { showLoginError(data.detail || "Login failed."); return; }
+      token = data.access_token;
+      localStorage.setItem("ia_token", token);
+      localStorage.setItem("ia_user", data.username);
+      showAnalyser();
+    } catch(e) { showLoginError("Cannot reach server. Make sure backend is running on port 8000."); }
+    finally { btn.disabled = false; btn.textContent = "Sign in"; }
+  }
+  function showLoginError(msg) { const el = document.getElementById("login-error"); el.textContent = msg; el.style.display = "block"; }
+  function logout() { token = null; localStorage.removeItem("ia_token"); localStorage.removeItem("ia_user"); reset(); showLogin(); }
+  function loadExample(key) { document.getElementById("ingredients-input").value = EXAMPLES[key]; }
+  async function analyse() {
+    const text = document.getElementById("ingredients-input").value.trim();
+    if (!text) { const e = document.getElementById("error-box"); e.textContent = "⚠ Please enter an ingredients list first."; e.style.display = "block"; return; }
+    document.getElementById("input-section").style.display = "none";
+    document.getElementById("results-wrap").style.display = "none";
+    document.getElementById("loading-wrap").style.display = "block";
+    document.getElementById("error-box").style.display = "none";
+    try {
+      const res = await fetch(`${API_BASE}/analyse`, { method: "POST", headers: {"Content-Type":"application/json","Authorization":`Bearer ${token}`}, body: JSON.stringify({ingredients_text: text}) });
+      const data = await res.json();
+      if (res.status === 401) { logout(); return; }
+      if (!res.ok) throw new Error(data.detail || "Analysis failed.");
+      renderResults(data);
+    } catch(e) {
+      document.getElementById("loading-wrap").style.display = "none";
+      document.getElementById("input-section").style.display = "block";
+      const eb = document.getElementById("error-box"); eb.textContent = "⚠ " + e.message; eb.style.display = "block";
+    }
+  }
+  function renderResults(data) {
+    document.getElementById("loading-wrap").style.display = "none";
+    document.getElementById("stat-total").textContent = data.total;
+    document.getElementById("stat-safe").textContent = data.safe_count;
+    document.getElementById("stat-mild").textContent = data.mildly_safe_count;
+    document.getElementById("stat-harm").textContent = data.harmful_count;
+    const badge = document.getElementById("overall-badge");
+    const labels = {safe:"✓ Overall Safe", mildly_safe:"⚠ Mildly Safe", harmful:"✗ Contains Harmful Ingredients"};
+    badge.className = `overall-badge-lg ${data.overall_assessment}`;
+    badge.textContent = labels[data.overall_assessment] || data.overall_assessment;
+    document.getElementById("summary-text").textContent = data.summary;
+    const order = {harmful:0, mildly_safe:1, safe:2};
+    const sorted = [...data.ingredients].sort((a,b) => { const oa = a.found_in_db?(order[a.severity]??3):4; const ob = b.found_in_db?(order[b.severity]??3):4; return oa-ob; });
+    const grid = document.getElementById("ingredients-grid");
+    grid.innerHTML = "";
+    const sevLabels = {safe:"Safe", mildly_safe:"Mildly Safe", harmful:"Harmful"};
+    sorted.forEach((ing,i) => {
+      const card = document.createElement("div");
+      const cls = ing.found_in_db ? ing.severity : "unknown";
+      card.className = `ingredient-card ${cls}`;
+      card.style.animationDelay = `${i*0.04}s`;
+      const pillLabel = ing.found_in_db ? (sevLabels[ing.severity]||ing.severity) : "Unknown";
+      card.innerHTML = `<div class="ingredient-top"><span class="ingredient-name">${esc(ing.name)}</span><span class="severity-pill ${cls}">${pillLabel}</span></div><p class="ingredient-desc">${esc(ing.description)}</p><p class="ingredient-reason">${esc(ing.reason)}</p>`;
+      grid.appendChild(card);
+    });
+    document.getElementById("results-wrap").style.display = "flex";
+  }
+  function esc(s) { return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  function reset() { document.getElementById("ingredients-input").value = ""; document.getElementById("results-wrap").style.display = "none"; document.getElementById("loading-wrap").style.display = "none"; document.getElementById("error-box").style.display = "none"; document.getElementById("input-section").style.display = "block"; }
+  init();
+</script>
+</body>
+</html>
