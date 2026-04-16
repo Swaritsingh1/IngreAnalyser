@@ -10,7 +10,7 @@ An AI-powered web application that analyses product ingredient labels and classi
 - 📋 Paste any product's ingredient list and get instant analysis
 - 🟢 🟡 🔴 Per-ingredient severity classification (Safe / Mildly Safe / Harmful)
 - 📊 Summary stats — total ingredients, counts per severity level
-- 🗃️ 200+ ingredients in local database (no API key required)
+- 🗃️ 2000+ ingredients in local database (no API key required)
 - 🔍 Fuzzy matching for alternate names and E-numbers
 - 💡 Example presets to test instantly (Soda, Chips, Bread, Candy, Yogurt)
 - ⚡ Works fully offline — no external AI API needed
